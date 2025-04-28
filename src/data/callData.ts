@@ -101,16 +101,16 @@ export const callTranscriptions: Record<string, CallTranscription> = {
     id: '1',
     text: "Hello, this is John Smith. I'm calling about the recent order I placed. I wanted to check on the status of my shipment. I was told it would arrive by yesterday, but I haven't received any tracking information yet.",
     segments: [
-      { speaker: 'John Smith', text: 'Hello, this is John Smith. I'm calling about the recent order I placed.', timestamp: '00:00' },
+      { speaker: 'John Smith', text: 'Hello, this is John Smith. I\'m calling about the recent order I placed.', timestamp: '00:00' },
       { speaker: 'Sales Rep', text: 'Hi John, thank you for calling. Let me check that for you.', timestamp: '00:12' },
       { speaker: 'John Smith', text: 'I wanted to check on the status of my shipment. I was told it would arrive by yesterday.', timestamp: '00:18' },
       { speaker: 'Sales Rep', text: 'I see your order here. It looks like there was a slight delay in processing. Your order shipped this morning.', timestamp: '00:32' },
       { speaker: 'John Smith', text: 'Oh, I see. Do you have tracking information?', timestamp: '00:50' },
-      { speaker: 'Sales Rep', text: 'Yes, I'll email that to you right away. You should receive delivery by tomorrow afternoon.', timestamp: '01:02' },
+      { speaker: 'Sales Rep', text: 'Yes, I\'ll email that to you right away. You should receive delivery by tomorrow afternoon.', timestamp: '01:02' },
       { speaker: 'John Smith', text: 'Great, thank you for your help.', timestamp: '01:15' },
       { speaker: 'Sales Rep', text: 'Is there anything else I can assist you with today?', timestamp: '01:20' },
-      { speaker: 'John Smith', text: 'No, that's all I needed. Have a good day.', timestamp: '01:25' },
-      { speaker: 'Sales Rep', text: 'You too, thank you for calling.', timestamp: '01:30' },
+      { speaker: 'John Smith', text: 'No, that\'s all I needed. Have a good day.', timestamp: '01:25' },
+      { speaker: 'Sales Rep', text: 'You too, thank you for calling.', timestamp: '01:30' }
     ]
   },
   '2': {
@@ -125,7 +125,7 @@ export const callTranscriptions: Record<string, CallTranscription> = {
       { speaker: 'Support Rep', text: "Thank you. I see the issue - your account has been temporarily locked due to multiple login attempts. I can reset that for you now.", timestamp: '00:45' },
       { speaker: 'Emily Johnson', text: "Oh, that explains it. Yes, please reset it.", timestamp: '01:10' },
       { speaker: 'Support Rep', text: "Done. You should receive an email with instructions to set a new password. Is there anything else you need help with?", timestamp: '01:20' },
-      { speaker: 'Emily Johnson', text: "No, that's all. Thank you for your help!", timestamp: '01:50' },
+      { speaker: 'Emily Johnson', text: "No, that's all. Thank you for your help!", timestamp: '01:50' }
     ]
   },
   '3': {
@@ -142,7 +142,7 @@ export const callTranscriptions: Record<string, CallTranscription> = {
       { speaker: 'Michael Brown', text: "Great. Let me discuss this with my team and get back to you by Friday.", timestamp: '01:45' },
       { speaker: 'Sales Rep', text: "Sounds good. I'll send you an email with the discount details we discussed. Is there anything else you'd like to know?", timestamp: '01:55' },
       { speaker: 'Michael Brown', text: "That covers everything for now. Thanks for calling.", timestamp: '02:10' },
-      { speaker: 'Sales Rep', text: "You're welcome. Looking forward to hearing from you on Friday.", timestamp: '02:15' },
+      { speaker: 'Sales Rep', text: "You're welcome. Looking forward to hearing from you on Friday.", timestamp: '02:15' }
     ]
   }
 };
