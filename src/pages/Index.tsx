@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Search, ChevronLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -10,9 +11,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
-import { callLogs } from '@/data/callData';
+import { CallLog, callLogs } from '@/data/callData';
+import CallInsightPanel from '@/components/CallInsightPanel';
 
 const Index = () => {
+  const [selectedCall, setSelectedCall] = useState<CallLog | null>(null);
+  
+  const handleRowClick = (call: CallLog) => {
+    setSelectedCall(call);
+  };
+  
+  const handleClosePanel = () => {
+    setSelectedCall(null);
+  };
+
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
@@ -57,36 +69,39 @@ const Index = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>User Name</TableHead>
-                  <TableHead>Workspace Name</TableHead>
-                  <TableHead>Email ID</TableHead>
+                  <TableHead>Caller</TableHead>
+                  <TableHead>Recipient</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Time</TableHead>
+                  <TableHead>Duration</TableHead>
+                  <TableHead>Type</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Subscription</TableHead>
-                  <TableHead>Usage</TableHead>
-                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {callLogs.map((log) => (
-                  <TableRow key={log.id}>
+                  <TableRow 
+                    key={log.id}
+                    onClick={() => handleRowClick(log)}
+                    className="cursor-pointer hover:bg-gray-50"
+                  >
                     <TableCell className="font-medium">{log.caller}</TableCell>
                     <TableCell>{log.recipient}</TableCell>
+                    <TableCell>{log.date}</TableCell>
+                    <TableCell>{log.time}</TableCell>
+                    <TableCell>{log.duration}</TableCell>
                     <TableCell>{log.type}</TableCell>
                     <TableCell>
-                      <Badge variant="secondary" className="bg-green-100 text-green-800">
-                        Active
+                      <Badge 
+                        variant="secondary" 
+                        className={
+                          log.status === 'completed' ? "bg-green-100 text-green-800" : 
+                          log.status === 'missed' ? "bg-red-100 text-red-800" : 
+                          "bg-yellow-100 text-yellow-800"
+                        }
+                      >
+                        {log.status}
                       </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                        Starter
-                      </Badge>
-                    </TableCell>
-                    <TableCell>0/20</TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="icon">
-                        ⋮
-                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -95,6 +110,9 @@ const Index = () => {
           </div>
         </div>
       </div>
+
+      {/* Call Insight Panel */}
+      <CallInsightPanel call={selectedCall} onClose={handleClosePanel} />
     </div>
   );
 };
