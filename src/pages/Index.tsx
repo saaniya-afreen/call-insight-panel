@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, ChevronLeft, Loader2 } from 'lucide-react';
+import { Search, ChevronLeft, Loader2, LogOut } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -22,6 +22,7 @@ import { useCallLogs } from '@/hooks/useCallLogs';
 import type { CallLog } from '@/types/supabase';
 import { formatDate, formatTime, formatDuration, mapDirection, mapCallStatus } from '@/types/supabase';
 import CallInsightPanel from '@/components/CallInsightPanel';
+import { useAuth } from '@/contexts/AuthContext';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -32,6 +33,7 @@ const Index = () => {
     page: currentPage, 
     pageSize: ITEMS_PER_PAGE 
   });
+  const { user, signOut } = useAuth();
 
   // Pagination calculations with server-side data
   const totalItems = result?.totalCount || 0;
@@ -65,17 +67,33 @@ const Index = () => {
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
-      <div className="w-60 bg-white border-r p-6 space-y-6">
+      <div className="w-60 bg-white border-r p-6 flex flex-col">
         <div className="flex items-center space-x-2">
           <ChevronLeft className="h-5 w-5" />
           <h1 className="text-xl font-semibold">MPA Call Logs</h1>
         </div>
         
-        <nav className="space-y-2">
+        <nav className="space-y-2 mt-6 flex-1">
           <a href="#" className="flex items-center space-x-2 px-3 py-2 bg-gray-100 rounded">
             <span className="text-sm font-medium">Call Logs</span>
           </a>
         </nav>
+
+        {/* User info and logout */}
+        <div className="border-t pt-4 space-y-3">
+          <p className="text-sm text-muted-foreground truncate" title={user?.email}>
+            {user?.email}
+          </p>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="w-full" 
+            onClick={signOut}
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Logout
+          </Button>
+        </div>
       </div>
 
       {/* Main Content */}
