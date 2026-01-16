@@ -166,24 +166,36 @@ const Index = () => {
                     <PaginationItem>
                       <PaginationPrevious 
                         onClick={handlePreviousPage}
-                        className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                        className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
                       />
                     </PaginationItem>
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                      <PaginationItem key={page}>
-                        <PaginationLink
-                          onClick={() => setCurrentPage(page)}
-                          isActive={currentPage === page}
-                          className="cursor-pointer"
-                        >
-                          {page}
-                        </PaginationLink>
-                      </PaginationItem>
-                    ))}
+                    {(() => {
+                      // Show 2 page numbers at a time based on current page
+                      const maxVisible = 2;
+                      let start = currentPage;
+                      let end = Math.min(currentPage + maxVisible - 1, totalPages);
+                      
+                      if (end - start + 1 < maxVisible) {
+                        start = Math.max(1, end - maxVisible + 1);
+                      }
+                      
+                      const visiblePages = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+                      
+                      return visiblePages.map((page) => (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            onClick={() => setCurrentPage(page)}
+                            isActive={currentPage === page}
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ));
+                    })()}
                     <PaginationItem>
                       <PaginationNext 
                         onClick={handleNextPage}
-                        className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                        className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
                       />
                     </PaginationItem>
                   </PaginationContent>

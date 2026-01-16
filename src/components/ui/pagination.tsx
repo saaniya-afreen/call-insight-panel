@@ -20,7 +20,7 @@ const PaginationContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ul
     ref={ref}
-    className={cn("flex flex-row items-center gap-1", className)}
+    className={cn("flex flex-row items-center gap-2", className)}
     {...props}
   />
 ))
@@ -42,16 +42,15 @@ type PaginationLinkProps = {
 const PaginationLink = ({
   className,
   isActive,
-  size = "icon",
   ...props
 }: PaginationLinkProps) => (
   <a
     aria-current={isActive ? "page" : undefined}
     className={cn(
-      buttonVariants({
-        variant: isActive ? "outline" : "ghost",
-        size,
-      }),
+      "h-10 w-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors cursor-pointer",
+      isActive 
+        ? "bg-blue-500 text-white hover:bg-blue-600" 
+        : "border border-gray-200 text-gray-500 hover:bg-gray-50",
       className
     )}
     {...props}
@@ -62,32 +61,34 @@ PaginationLink.displayName = "PaginationLink"
 const PaginationPrevious = ({
   className,
   ...props
-}: React.ComponentProps<typeof PaginationLink>) => (
-  <PaginationLink
+}: React.ComponentProps<"a">) => (
+  <a
     aria-label="Go to previous page"
-    size="default"
-    className={cn("gap-1 pl-2.5", className)}
+    className={cn(
+      "h-10 w-10 rounded-full flex items-center justify-center border border-gray-200 text-gray-400 hover:bg-gray-50 cursor-pointer transition-colors",
+      className
+    )}
     {...props}
   >
-    <ChevronLeft className="h-4 w-4" />
-    <span>Previous</span>
-  </PaginationLink>
+    <ChevronLeft className="h-5 w-5" />
+  </a>
 )
 PaginationPrevious.displayName = "PaginationPrevious"
 
 const PaginationNext = ({
   className,
   ...props
-}: React.ComponentProps<typeof PaginationLink>) => (
-  <PaginationLink
+}: React.ComponentProps<"a">) => (
+  <a
     aria-label="Go to next page"
-    size="default"
-    className={cn("gap-1 pr-2.5", className)}
+    className={cn(
+      "h-10 w-10 rounded-full flex items-center justify-center border border-gray-200 text-gray-400 hover:bg-gray-50 cursor-pointer transition-colors",
+      className
+    )}
     {...props}
   >
-    <span>Next</span>
-    <ChevronRight className="h-4 w-4" />
-  </PaginationLink>
+    <ChevronRight className="h-5 w-5" />
+  </a>
 )
 PaginationNext.displayName = "PaginationNext"
 
