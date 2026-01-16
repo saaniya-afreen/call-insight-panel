@@ -43,14 +43,16 @@ export interface CallLog {
 
 // Helper functions to transform Supabase data
 export const formatDuration = (startTimestamp: number, endTimestamp: number): string => {
-  const durationMs = (endTimestamp - startTimestamp) * 1000;
+  // Timestamps are already in milliseconds
+  const durationMs = endTimestamp - startTimestamp;
   const minutes = Math.floor(durationMs / 60000);
   const seconds = Math.floor((durationMs % 60000) / 1000);
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 };
 
 export const formatDate = (timestamp: number): string => {
-  const date = new Date(timestamp * 1000);
+  // Timestamp is in milliseconds
+  const date = new Date(timestamp);
   return date.toLocaleDateString('en-US', { 
     year: 'numeric', 
     month: 'short', 
@@ -59,7 +61,8 @@ export const formatDate = (timestamp: number): string => {
 };
 
 export const formatTime = (timestamp: number): string => {
-  const date = new Date(timestamp * 1000);
+  // Timestamp is in milliseconds
+  const date = new Date(timestamp);
   return date.toLocaleTimeString('en-US', { 
     hour: '2-digit', 
     minute: '2-digit',

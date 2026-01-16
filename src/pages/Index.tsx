@@ -10,14 +10,34 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { useCallLogs } from '@/hooks/useCallLogs';
 import type { CallLog } from '@/types/supabase';
 import { formatDate, formatTime, formatDuration, mapDirection, mapCallStatus } from '@/types/supabase';
 import CallInsightPanel from '@/components/CallInsightPanel';
 
+const ITEMS_PER_PAGE = 10;
+
 const Index = () => {
   const [selectedCall, setSelectedCall] = useState<CallLog | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const { data: callLogs, isLoading, error } = useCallLogs();
+
+  // Pagination calculations
+  const totalItems = callLogs?.length || 0;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedLogs = callLogs?.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  const handlePreviousPage = () => setCurrentPage(p => Math.max(1, p - 1));
+  const handleNextPage = () => setCurrentPage(p => Math.min(totalPages, p + 1));
   
   const handleRowClick = (call: CallLog) => {
     setSelectedCall(call);
@@ -103,7 +123,7 @@ const Index = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {callLogs?.map((log) => {
+                  {paginatedLogs?.map((log) => {
                     const callerName = log.extracted_info?.caller_name || log.from_number;
                     const displayDate = formatDate(log.start_timestamp);
                     const displayTime = formatTime(log.start_timestamp);
@@ -136,6 +156,39 @@ const Index = () => {
                   })}
                 </TableBody>
               </Table>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="p-4 border-t">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        onClick={handlePreviousPage}
+                        className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                      />
+                    </PaginationItem>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          onClick={() => setCurrentPage(page)}
+                          isActive={currentPage === page}
+                          className="cursor-pointer"
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext 
+                        onClick={handleNextPage}
+                        className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
             )}
           </div>
         </div>
