@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, ChevronLeft, Loader2, LogOut } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Loader2, LogOut } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -29,6 +29,8 @@ const ITEMS_PER_PAGE = 10;
 const Index = () => {
   const [selectedCall, setSelectedCall] = useState<CallLog | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { data: result, isLoading, error } = useCallLogs({ 
     page: currentPage, 
     pageSize: ITEMS_PER_PAGE 
@@ -39,6 +41,18 @@ const Index = () => {
   const totalItems = result?.totalCount || 0;
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
   const paginatedLogs = result?.data;
+
+  // Client-side search filter
+  const filteredLogs = paginatedLogs?.filter(log => {
+    if (!searchTerm) return true;
+    const search = searchTerm.toLowerCase();
+    const callerName = log.extracted_info?.caller_name || '';
+    return (
+      callerName.toLowerCase().includes(search) ||
+      log.from_number.includes(search) ||
+      log.to_number.includes(search)
+    );
+  });
 
   const handlePreviousPage = () => setCurrentPage(p => Math.max(1, p - 1));
   const handleNextPage = () => setCurrentPage(p => Math.min(totalPages, p + 1));
@@ -67,31 +81,43 @@ const Index = () => {
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
-      <div className="w-60 bg-white border-r p-6 flex flex-col">
-        <div className="flex items-center space-x-2">
-          <ChevronLeft className="h-5 w-5" />
-          <h1 className="text-xl font-semibold">MPA Call Logs</h1>
+      <div className={`${sidebarCollapsed ? 'w-16' : 'w-60'} bg-white border-r p-4 flex flex-col transition-all duration-300`}>
+        <div 
+          className="flex items-center space-x-2 cursor-pointer"
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+        >
+          {sidebarCollapsed ? (
+            <ChevronRight className="h-5 w-5" />
+          ) : (
+            <>
+              <ChevronLeft className="h-5 w-5" />
+              <h1 className="text-xl font-semibold">MPA Call Logs</h1>
+            </>
+          )}
         </div>
         
         <nav className="space-y-2 mt-6 flex-1">
-          <a href="#" className="flex items-center space-x-2 px-3 py-2 bg-gray-100 rounded">
-            <span className="text-sm font-medium">Call Logs</span>
+          <a href="#" className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'space-x-2'} px-3 py-2 bg-gray-100 rounded`}>
+            {!sidebarCollapsed && <span className="text-sm font-medium">Call Logs</span>}
+            {sidebarCollapsed && <span className="text-xs">📞</span>}
           </a>
         </nav>
 
         {/* User info and logout */}
         <div className="border-t pt-4 space-y-3">
-          <p className="text-sm text-muted-foreground truncate" title={user?.email}>
-            {user?.email}
-          </p>
+          {!sidebarCollapsed && (
+            <p className="text-sm text-muted-foreground truncate" title={user?.email}>
+              {user?.email}
+            </p>
+          )}
           <Button 
             variant="outline" 
             size="sm" 
-            className="w-full" 
+            className={sidebarCollapsed ? 'w-full p-2' : 'w-full'}
             onClick={signOut}
           >
-            <LogOut className="h-4 w-4 mr-2" />
-            Logout
+            <LogOut className="h-4 w-4" />
+            {!sidebarCollapsed && <span className="ml-2">Logout</span>}
           </Button>
         </div>
       </div>
@@ -109,6 +135,8 @@ const Index = () => {
               <input
                 type="text"
                 placeholder="Search logs..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 pr-4 py-2 border rounded-lg w-[300px] focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -143,7 +171,7 @@ const Index = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedLogs?.map((log) => {
+                  {filteredLogs?.map((log) => {
                     const callerName = log.extracted_info?.caller_name || log.from_number;
                     const displayDate = formatDate(log.start_timestamp);
                     const displayTime = formatTime(log.start_timestamp);
