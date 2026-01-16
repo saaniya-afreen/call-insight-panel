@@ -1,5 +1,6 @@
 import React from 'react';
 import type { CallLog } from '@/types/supabase';
+import { formatDate, formatTime, formatDuration, mapDirection, mapCallStatus } from '@/types/supabase';
 import { 
   CalendarIcon, 
   Clock, 
@@ -14,8 +15,15 @@ interface CallDetailsTabProps {
 }
 
 const CallDetailsTab: React.FC<CallDetailsTabProps> = ({ call }) => {
+  const displayType = mapDirection(call.direction);
+  const displayStatus = mapCallStatus(call.call_status);
+  const displayDate = formatDate(call.start_timestamp);
+  const displayTime = formatTime(call.start_timestamp);
+  const displayDuration = formatDuration(call.start_timestamp, call.end_timestamp);
+  const callerName = call.extracted_info?.caller_name || call.from_number;
+
   const getStatusBadgeClass = () => {
-    switch (call.status) {
+    switch (displayStatus) {
       case 'completed':
         return 'bg-green-100 text-green-800 border-green-200';
       case 'missed':
@@ -38,14 +46,14 @@ const CallDetailsTab: React.FC<CallDetailsTabProps> = ({ call }) => {
       
       <div className="space-y-4">
         <div className="flex items-center p-3 bg-gray-50 rounded-md">
-          {call.type === 'incoming' ? (
+          {displayType === 'incoming' ? (
             <PhoneIncoming className="h-5 w-5 text-blue-500 mr-3" />
           ) : (
             <PhoneOutgoing className="h-5 w-5 text-green-500 mr-3" />
           )}
           <div>
             <div className="text-sm font-medium text-gray-900">
-              {call.type === 'incoming' ? 'Incoming Call' : 'Outgoing Call'}
+              {displayType === 'incoming' ? 'Incoming Call' : 'Outgoing Call'}
             </div>
             <div className="text-sm text-gray-500">
               Type
@@ -56,15 +64,15 @@ const CallDetailsTab: React.FC<CallDetailsTabProps> = ({ call }) => {
         <div className="flex items-center p-3 bg-gray-50 rounded-md">
           <User className="h-5 w-5 text-gray-500 mr-3" />
           <div>
-            <div className="text-sm font-medium text-gray-900">{call.caller}</div>
-            <div className="text-sm text-gray-500">Caller</div>
+            <div className="text-sm font-medium text-gray-900">{callerName}</div>
+            <div className="text-sm text-gray-500">Caller ({call.from_number})</div>
           </div>
         </div>
         
         <div className="flex items-center p-3 bg-gray-50 rounded-md">
           <Users className="h-5 w-5 text-gray-500 mr-3" />
           <div>
-            <div className="text-sm font-medium text-gray-900">{call.recipient}</div>
+            <div className="text-sm font-medium text-gray-900">{call.to_number}</div>
             <div className="text-sm text-gray-500">Recipient</div>
           </div>
         </div>
@@ -73,7 +81,7 @@ const CallDetailsTab: React.FC<CallDetailsTabProps> = ({ call }) => {
           <div className="flex items-center p-3 bg-gray-50 rounded-md">
             <CalendarIcon className="h-5 w-5 text-gray-500 mr-3" />
             <div>
-              <div className="text-sm font-medium text-gray-900">{call.date}</div>
+              <div className="text-sm font-medium text-gray-900">{displayDate}</div>
               <div className="text-sm text-gray-500">Date</div>
             </div>
           </div>
@@ -81,7 +89,7 @@ const CallDetailsTab: React.FC<CallDetailsTabProps> = ({ call }) => {
           <div className="flex items-center p-3 bg-gray-50 rounded-md">
             <Clock className="h-5 w-5 text-gray-500 mr-3" />
             <div>
-              <div className="text-sm font-medium text-gray-900">{call.time}</div>
+              <div className="text-sm font-medium text-gray-900">{displayTime}</div>
               <div className="text-sm text-gray-500">Time</div>
             </div>
           </div>
@@ -91,15 +99,22 @@ const CallDetailsTab: React.FC<CallDetailsTabProps> = ({ call }) => {
           <div className="flex items-center">
             <Clock className="h-5 w-5 text-gray-500 mr-3" />
             <div>
-              <div className="text-sm font-medium text-gray-900">{call.duration}</div>
+              <div className="text-sm font-medium text-gray-900">{displayDuration}</div>
               <div className="text-sm text-gray-500">Duration</div>
             </div>
           </div>
           
           <div className={`px-3 py-1 text-sm border rounded-full ${getStatusBadgeClass()}`}>
-            {call.status}
+            {displayStatus}
           </div>
         </div>
+
+        {call.disconnection_reason && (
+          <div className="p-3 bg-gray-50 rounded-md">
+            <div className="text-sm font-medium text-gray-900">{call.disconnection_reason}</div>
+            <div className="text-sm text-gray-500">Disconnection Reason</div>
+          </div>
+        )}
       </div>
     </div>
   );

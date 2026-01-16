@@ -1,13 +1,12 @@
-
 import React from 'react';
-import { CallTranscription } from '../data/callData';
+import type { TranscriptMessage } from '@/types/supabase';
 
 interface TranscriptionTabProps {
-  transcription: CallTranscription | undefined;
+  messages: TranscriptMessage[];
 }
 
-const TranscriptionTab: React.FC<TranscriptionTabProps> = ({ transcription }) => {
-  if (!transcription) {
+const TranscriptionTab: React.FC<TranscriptionTabProps> = ({ messages }) => {
+  if (!messages || messages.length === 0) {
     return (
       <div className="p-6 flex flex-col items-center justify-center h-full">
         <div className="text-gray-400 text-center">
@@ -32,31 +31,53 @@ const TranscriptionTab: React.FC<TranscriptionTabProps> = ({ transcription }) =>
     );
   }
 
+  const getSpeakerLabel = (role: 'assistant' | 'user') => {
+    return role === 'assistant' ? 'AI Assistant' : 'Customer';
+  };
+
+  const getSpeakerStyles = (role: 'assistant' | 'user') => {
+    if (role === 'assistant') {
+      return {
+        bubble: 'bg-blue-50 text-blue-900 rounded-tl-none',
+        label: 'text-blue-600'
+      };
+    }
+    return {
+      bubble: 'bg-gray-50 text-gray-900 rounded-tr-none',
+      label: 'text-gray-600'
+    };
+  };
+
   return (
     <div className="p-4">
       <div className="mb-4">
         <h3 className="text-lg font-medium text-gray-900">Call Transcription</h3>
         <p className="text-sm text-gray-500 mt-1">
-          Full conversation transcript with timestamps.
+          Full conversation transcript.
         </p>
       </div>
       
-      <div className="space-y-6 mt-4">
-        {transcription.segments.map((segment, index) => (
-          <div key={index} className="flex">
-            <div className="flex-shrink-0 w-16 text-xs text-gray-500 pt-1">
-              {segment.timestamp}
-            </div>
-            <div className="flex-grow">
-              <div className="text-sm font-medium text-gray-900 mb-1">
-                {segment.speaker}
+      <div className="space-y-4 mt-4">
+        {messages.map((message, index) => {
+          const styles = getSpeakerStyles(message.role);
+          const isAssistant = message.role === 'assistant';
+          
+          return (
+            <div 
+              key={index} 
+              className={`flex ${isAssistant ? 'justify-start' : 'justify-end'}`}
+            >
+              <div className={`max-w-[85%] ${isAssistant ? '' : 'text-right'}`}>
+                <div className={`text-xs font-medium mb-1 ${styles.label}`}>
+                  {getSpeakerLabel(message.role)}
+                </div>
+                <div className={`text-sm p-3 rounded-lg ${styles.bubble}`}>
+                  {message.content}
+                </div>
               </div>
-              <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg rounded-tl-none">
-                {segment.text}
-              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

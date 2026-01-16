@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Search, ChevronLeft, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useCallLogs } from '@/hooks/useCallLogs';
 import type { CallLog } from '@/types/supabase';
+import { formatDate, formatTime, formatDuration, mapDirection, mapCallStatus } from '@/types/supabase';
 import CallInsightPanel from '@/components/CallInsightPanel';
 
 const Index = () => {
@@ -25,6 +25,19 @@ const Index = () => {
   
   const handleClosePanel = () => {
     setSelectedCall(null);
+  };
+
+  const getStatusBadgeClass = (status: 'completed' | 'missed' | 'voicemail') => {
+    switch (status) {
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      case 'missed':
+        return 'bg-red-100 text-red-800';
+      case 'voicemail':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   };
 
   return (
@@ -90,32 +103,37 @@ const Index = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {callLogs?.map((log) => (
-                    <TableRow 
-                      key={log.id}
-                      onClick={() => handleRowClick(log)}
-                      className="cursor-pointer hover:bg-gray-50"
-                    >
-                      <TableCell className="font-medium">{log.caller}</TableCell>
-                      <TableCell>{log.recipient}</TableCell>
-                      <TableCell>{log.date}</TableCell>
-                      <TableCell>{log.time}</TableCell>
-                      <TableCell>{log.duration}</TableCell>
-                      <TableCell>{log.type}</TableCell>
-                      <TableCell>
-                        <Badge 
-                          variant="secondary" 
-                          className={
-                            log.status === 'completed' ? "bg-green-100 text-green-800" : 
-                            log.status === 'missed' ? "bg-red-100 text-red-800" : 
-                            "bg-yellow-100 text-yellow-800"
-                          }
-                        >
-                          {log.status}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {callLogs?.map((log) => {
+                    const callerName = log.extracted_info?.caller_name || log.from_number;
+                    const displayDate = formatDate(log.start_timestamp);
+                    const displayTime = formatTime(log.start_timestamp);
+                    const displayDuration = formatDuration(log.start_timestamp, log.end_timestamp);
+                    const displayType = mapDirection(log.direction);
+                    const displayStatus = mapCallStatus(log.call_status);
+
+                    return (
+                      <TableRow 
+                        key={log.id}
+                        onClick={() => handleRowClick(log)}
+                        className="cursor-pointer hover:bg-gray-50"
+                      >
+                        <TableCell className="font-medium">{callerName}</TableCell>
+                        <TableCell>{log.to_number}</TableCell>
+                        <TableCell>{displayDate}</TableCell>
+                        <TableCell>{displayTime}</TableCell>
+                        <TableCell>{displayDuration}</TableCell>
+                        <TableCell className="capitalize">{displayType}</TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant="secondary" 
+                            className={getStatusBadgeClass(displayStatus)}
+                          >
+                            {displayStatus}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             )}

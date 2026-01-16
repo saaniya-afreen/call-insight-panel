@@ -1,9 +1,7 @@
-
 import React, { useState } from 'react';
-import { X, Loader2 } from 'lucide-react';
+import { X } from 'lucide-react';
 import type { CallLog } from '@/types/supabase';
-import type { CallTranscription as OriginalTranscription, ExtractedInfo as OriginalExtractedInfo } from '@/data/callData';
-import { useCallTranscription, useExtractedInfo } from '@/hooks/useCallLogs';
+import { parseTranscript } from '@/types/supabase';
 import CallDetailsTab from './CallDetailsTab';
 import TranscriptionTab from './TranscriptionTab';
 import ExtractedInfoTab from './ExtractedInfoTab';
@@ -18,8 +16,6 @@ type TabType = 'details' | 'transcription' | 'extracted';
 
 const CallInsightPanel: React.FC<CallInsightPanelProps> = ({ call, onClose }) => {
   const [activeTab, setActiveTab] = useState<TabType>('details');
-  const { data: transcription, isLoading: transcriptionLoading } = useCallTranscription(call?.id || null);
-  const { data: extractedInfo, isLoading: extractedLoading } = useExtractedInfo(call?.id || null);
 
   if (!call) return null;
 
@@ -28,7 +24,7 @@ const CallInsightPanel: React.FC<CallInsightPanelProps> = ({ call, onClose }) =>
     label: string;
     active: boolean;
     onClick: () => void;
-  }> = ({ tab, label, active, onClick }) => (
+  }> = ({ label, active, onClick }) => (
     <button
       className={cn(
         "py-2 px-4 text-sm font-medium border-b-2 focus:outline-none transition-colors",
@@ -42,20 +38,8 @@ const CallInsightPanel: React.FC<CallInsightPanelProps> = ({ call, onClose }) =>
     </button>
   );
 
-  // Transform Supabase data to match component interfaces
-  const formattedTranscription: OriginalTranscription | undefined = transcription ? {
-    id: transcription.id,
-    text: transcription.full_text,
-    segments: (transcription.segments as Array<{ speaker: string; text: string; timestamp: string }>) || []
-  } : undefined;
-
-  const formattedExtractedInfo: OriginalExtractedInfo | undefined = extractedInfo ? {
-    id: extractedInfo.id,
-    topics: extractedInfo.topics,
-    sentimentScore: extractedInfo.sentiment_score,
-    actionItems: extractedInfo.action_items,
-    keyEntities: (extractedInfo.key_entities as Array<{ name: string; type: string }>) || []
-  } : undefined;
+  // Parse transcript from JSON string
+  const transcriptMessages = parseTranscript(call.transcript);
 
   return (
     <div className="fixed inset-y-0 right-0 w-96 bg-white border-l shadow-lg transform transition-transform ease-in-out duration-300 z-40 flex flex-col">
@@ -95,22 +79,10 @@ const CallInsightPanel: React.FC<CallInsightPanelProps> = ({ call, onClose }) =>
       <div className="flex-grow overflow-y-auto">
         {activeTab === 'details' && <CallDetailsTab call={call} />}
         {activeTab === 'transcription' && (
-          transcriptionLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-            </div>
-          ) : (
-            <TranscriptionTab transcription={formattedTranscription} />
-          )
+          <TranscriptionTab messages={transcriptMessages} />
         )}
         {activeTab === 'extracted' && (
-          extractedLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-            </div>
-          ) : (
-            <ExtractedInfoTab extractedInfo={formattedExtractedInfo} />
-          )
+          <ExtractedInfoTab extractedInfo={call.extracted_info} />
         )}
       </div>
     </div>
