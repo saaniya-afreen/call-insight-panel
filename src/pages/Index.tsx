@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Search, ChevronLeft } from 'lucide-react';
+import { Search, ChevronLeft, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -11,11 +11,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
-import { CallLog, callLogs } from '@/data/callData';
+import { useCallLogs } from '@/hooks/useCallLogs';
+import type { CallLog } from '@/types/supabase';
 import CallInsightPanel from '@/components/CallInsightPanel';
 
 const Index = () => {
   const [selectedCall, setSelectedCall] = useState<CallLog | null>(null);
+  const { data: callLogs, isLoading, error } = useCallLogs();
   
   const handleRowClick = (call: CallLog) => {
     setSelectedCall(call);
@@ -47,7 +49,7 @@ const Index = () => {
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-semibold">Call Logs</h1>
-              <Badge variant="secondary">2051</Badge>
+              <Badge variant="secondary">{callLogs?.length || 0}</Badge>
             </div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -66,47 +68,57 @@ const Index = () => {
               <Button variant="ghost">Missed</Button>
             </div>
 
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Caller</TableHead>
-                  <TableHead>Recipient</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Time</TableHead>
-                  <TableHead>Duration</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {callLogs.map((log) => (
-                  <TableRow 
-                    key={log.id}
-                    onClick={() => handleRowClick(log)}
-                    className="cursor-pointer hover:bg-gray-50"
-                  >
-                    <TableCell className="font-medium">{log.caller}</TableCell>
-                    <TableCell>{log.recipient}</TableCell>
-                    <TableCell>{log.date}</TableCell>
-                    <TableCell>{log.time}</TableCell>
-                    <TableCell>{log.duration}</TableCell>
-                    <TableCell>{log.type}</TableCell>
-                    <TableCell>
-                      <Badge 
-                        variant="secondary" 
-                        className={
-                          log.status === 'completed' ? "bg-green-100 text-green-800" : 
-                          log.status === 'missed' ? "bg-red-100 text-red-800" : 
-                          "bg-yellow-100 text-yellow-800"
-                        }
-                      >
-                        {log.status}
-                      </Badge>
-                    </TableCell>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+              </div>
+            ) : error ? (
+              <div className="text-center py-12 text-red-500">
+                Failed to load call logs. Please try again.
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Caller</TableHead>
+                    <TableHead>Recipient</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Time</TableHead>
+                    <TableHead>Duration</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Status</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {callLogs?.map((log) => (
+                    <TableRow 
+                      key={log.id}
+                      onClick={() => handleRowClick(log)}
+                      className="cursor-pointer hover:bg-gray-50"
+                    >
+                      <TableCell className="font-medium">{log.caller}</TableCell>
+                      <TableCell>{log.recipient}</TableCell>
+                      <TableCell>{log.date}</TableCell>
+                      <TableCell>{log.time}</TableCell>
+                      <TableCell>{log.duration}</TableCell>
+                      <TableCell>{log.type}</TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant="secondary" 
+                          className={
+                            log.status === 'completed' ? "bg-green-100 text-green-800" : 
+                            log.status === 'missed' ? "bg-red-100 text-red-800" : 
+                            "bg-yellow-100 text-yellow-800"
+                          }
+                        >
+                          {log.status}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </div>
         </div>
       </div>

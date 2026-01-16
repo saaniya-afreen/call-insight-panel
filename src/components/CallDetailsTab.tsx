@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { CallLog } from '../data/callData';
+import type { CallLog } from '@/types/supabase';
 import { 
   CalendarIcon, 
   Clock, 
