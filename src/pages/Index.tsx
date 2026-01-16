@@ -28,13 +28,15 @@ const ITEMS_PER_PAGE = 10;
 const Index = () => {
   const [selectedCall, setSelectedCall] = useState<CallLog | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const { data: callLogs, isLoading, error } = useCallLogs();
+  const { data: result, isLoading, error } = useCallLogs({ 
+    page: currentPage, 
+    pageSize: ITEMS_PER_PAGE 
+  });
 
-  // Pagination calculations
-  const totalItems = callLogs?.length || 0;
+  // Pagination calculations with server-side data
+  const totalItems = result?.totalCount || 0;
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedLogs = callLogs?.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const paginatedLogs = result?.data;
 
   const handlePreviousPage = () => setCurrentPage(p => Math.max(1, p - 1));
   const handleNextPage = () => setCurrentPage(p => Math.min(totalPages, p + 1));
@@ -82,7 +84,7 @@ const Index = () => {
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-semibold">Call Logs</h1>
-              <Badge variant="secondary">{callLogs?.length || 0}</Badge>
+              <Badge variant="secondary">{totalItems.toLocaleString()}</Badge>
             </div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
